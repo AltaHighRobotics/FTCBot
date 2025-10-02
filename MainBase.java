@@ -51,6 +51,7 @@ public class MainBase extends LinearOpMode {
             // about 60hz polling
             sleep(16);
             if (reverse) {
+                // dw the control station does some kind of deadzoning so we're fine
                 if (gamepad1.left_stick_x != 0) {
                     ml.setPower(gamepad1.left_stick_x * -1);
                     mr.setPower(gamepad1.left_stick_x * -1);
