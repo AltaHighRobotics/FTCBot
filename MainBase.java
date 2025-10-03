@@ -31,19 +31,19 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class MainBase extends LinearOpMode {
     private Blinker control_Hub;
-    private DcMotor ml;
-    private DcMotor mr;
-    private DcMotor mbl;
-    private DcMotor mbr;
+    private DcMotor mh1;
+    private DcMotor mh2;
+    private DcMotor mv1;
+    private DcMotor mv2;
     private boolean reverse;
     @Override
     public void runOpMode() {
         // initialization code
         control_Hub = hardwareMap.get(Blinker.class, "Control Hub");
-        ml = hardwareMap.get(DcMotor.class, "motor1");
-        mr = hardwareMap.get(DcMotor.class, "motor2");
-        mbl = hardwareMap.get(DcMotor.class, "motor3");
-        mbr = hardwareMap.get(DcMotor.class, "motor4");
+        mv1 = hardwareMap.get(DcMotor.class, "motor1");
+        mv2 = hardwareMap.get(DcMotor.class, "motor2");
+        mh1 = hardwareMap.get(DcMotor.class, "motor3");
+        mh2 = hardwareMap.get(DcMotor.class, "motor4");
         telemetry.addData("Reverse", "OFF");
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -57,30 +57,16 @@ public class MainBase extends LinearOpMode {
             sleep(16);
             if (reverse) {
                 // dw the control station does some kind of deadzoning so we're fine
-                if (gamepad1.left_stick_x != 0) {
-                    ml.setPower(gamepad1.left_stick_x * -1);
-                    mr.setPower(gamepad1.left_stick_x * -1);
-                    mbl.setPower(gamepad1.left_stick_y * -1);
-                    mbr.setPower(gamepad1.left_stick_y);
-                    } else {
-                       ml.setPower(gamepad1.left_stick_y * -1);
-                       mr.setPower(gamepad1.left_stick_y);
-                       mbl.setPower(gamepad1.left_stick_y * -1);
-                       mbr.setPower(gamepad1.left_stick_y);
-                    }
+                mv1.setPower(gamepad1.left_stick_y * -1);
+                mv2.setPower(gamepad1.left_stick_y);
+                mh1.setPower(gamepad1.left_stick_x * -1);
+                mh2.setPower(gamepad1.left_stick_x);
+
             } else {
-                if (gamepad1.left_stick_x != 0) {
-                        ml.setPower(gamepad1.left_stick_x);
-                        mr.setPower(gamepad1.left_stick_x);
-                        mbl.setPower(gamepad1.left_stick_y);
-                        mbr.setPower(gamepad1.left_stick_y * -1);
-                    } else {
-                        ml.setPower(gamepad1.left_stick_y);
-                        mr.setPower(gamepad1.left_stick_y * -1);
-                        mbl.setPower(gamepad1.left_stick_y);
-                        mbr.setPower(gamepad1.left_stick_y * -1);
-                    }
-                
+                mv1.setPower(gamepad1.left_stick_y);
+                mv2.setPower(gamepad1.left_stick_y * -1);
+                mh1.setPower(gamepad1.left_stick_x);
+                mh2.setPower(gamepad1.left_stick_x * -1);
             }
             if (gamepad1.left_bumper) {
                 reverse = true;
