@@ -33,6 +33,8 @@ public class MainBase extends LinearOpMode {
     private Blinker control_Hub;
     private DcMotor ml;
     private DcMotor mr;
+    private DcMotor mbl;
+    private DcMotor mbr;
     private boolean reverse;
     @Override
     public void runOpMode() {
@@ -40,6 +42,8 @@ public class MainBase extends LinearOpMode {
         control_Hub = hardwareMap.get(Blinker.class, "Control Hub");
         ml = hardwareMap.get(DcMotor.class, "motor1");
         mr = hardwareMap.get(DcMotor.class, "motor2");
+        mbl = hardwareMap.get(DcMotor.class, "motor3");
+        mbr = hardwareMap.get(DcMotor.class, "motor4");
         telemetry.addData("Reverse", "OFF");
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -55,17 +59,25 @@ public class MainBase extends LinearOpMode {
                 if (gamepad1.left_stick_x != 0) {
                     ml.setPower(gamepad1.left_stick_x * -1);
                     mr.setPower(gamepad1.left_stick_x * -1);
+                    mbl.setPower(gamepad1.left_stick_y * -1);
+                    mbr.setPower(gamepad1.left_stick_y);
                     } else {
                        ml.setPower(gamepad1.left_stick_y * -1);
                        mr.setPower(gamepad1.left_stick_y);
+                       mbl.setPower(gamepad1.left_stick_y * -1);
+                       mbr.setPower(gamepad1.left_stick_y);
                     }
             } else {
                 if (gamepad1.left_stick_x != 0) {
                         ml.setPower(gamepad1.left_stick_x);
                         mr.setPower(gamepad1.left_stick_x);
+                        mbl.setPower(gamepad1.left_stick_y);
+                        mbr.setPower(gamepad1.left_stick_y * -1);
                     } else {
                         ml.setPower(gamepad1.left_stick_y);
                         mr.setPower(gamepad1.left_stick_y * -1);
+                        mbl.setPower(gamepad1.left_stick_y);
+                        mbr.setPower(gamepad1.left_stick_y * -1);
                     }
                 
             }
