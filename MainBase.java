@@ -53,6 +53,7 @@ public class MainBase extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             // about 60hz polling
+            // technically this should be 16.66667 or whatever but I doubt half of a millisecond makes much of a difference
             sleep(16);
             if (reverse) {
                 // dw the control station does some kind of deadzoning so we're fine
