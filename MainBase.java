@@ -36,6 +36,7 @@ public class MainBase extends LinearOpMode {
     private DcMotor mv1;
     private DcMotor mv2;
     private boolean reverse;
+    //private boolean reverse_Rightstick;
     @Override
     public void runOpMode() {
         // initialization code
@@ -53,7 +54,7 @@ public class MainBase extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             // about 60hz polling
-            // technically this should be 16.66667 or whatever but I doubt half of a millisecond makes much of a difference
+            // technically this should be 16.66667 (67!)or whatever but I doubt half of a millisecond makes much of a difference
             sleep(16);
             if (reverse) {
                 // dw the control station does some kind of deadzoning so we're fine
@@ -67,6 +68,18 @@ public class MainBase extends LinearOpMode {
                 mv2.setPower(gamepad1.left_stick_y * -1);
                 mh1.setPower(gamepad1.left_stick_x);
                 mh2.setPower(gamepad1.left_stick_x * -1);
+            }
+            if  (gamepad1.right_stick_x > 0){
+                mv1.setPower(gamepad1.right_stick_x*-1 );
+                mv2.setPower(gamepad1.right_stick_x*-1);
+                mh1.setPower(gamepad1.right_stick_x *-1);
+                mh2.setPower(gamepad1.right_stick_x *-1);
+            } 
+            if (gamepad1.right_stick_x < 0) {
+                mv1.setPower(gamepad1.right_stick_x * -1);
+                mv2.setPower(gamepad1.right_stick_x * -1 );
+                mh1.setPower(gamepad1.right_stick_x * -1);
+                mh2.setPower(gamepad1.right_stick_x * -1);
             }
             if (gamepad1.left_bumper) {
                 reverse = true;
