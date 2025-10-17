@@ -9,27 +9,22 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @TeleOp(name = "DriverOrientedDriving")
 public class DriverOriented extends LinearOpMode {
-
     private DcMotor motorFL, motorFR, motorBL, motorBR;
     private IMU imu;
-
     private double initialHeading = 0;
 
     @Override
     public void runOpMode() {
-        // Motor mappings
-        motorFL = hardwareMap.get(DcMotor.class, "motor2");  // Front Left (vertical)
-        motorBR = hardwareMap.get(DcMotor.class, "motor1");  // Back Right (vertical)
-        motorFR = hardwareMap.get(DcMotor.class, "motor3");  // Front Right (horizontal)
-        motorBL = hardwareMap.get(DcMotor.class, "motor4");  // Back Left (horizontal)
+        motorFL = hardwareMap.get(DcMotor.class, "motor2");
+        motorBR = hardwareMap.get(DcMotor.class, "motor1");
+        motorFR = hardwareMap.get(DcMotor.class, "motor3");
+        motorBL = hardwareMap.get(DcMotor.class, "motor4");
 
-        // Motor directions
         motorFL.setDirection(DcMotor.Direction.FORWARD);
         motorBR.setDirection(DcMotor.Direction.REVERSE);
         motorFR.setDirection(DcMotor.Direction.REVERSE);
         motorBL.setDirection(DcMotor.Direction.FORWARD);
 
-        // Setup IMU
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
@@ -43,44 +38,52 @@ public class DriverOriented extends LinearOpMode {
 
         waitForStart();
 
-        // Set the driver's forward direction
         initialHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
+        boolean brakeMode = true;
+        boolean lastBumperState = false;
+
+        DcMotor.ZeroPowerBehavior behavior = DcMotor.ZeroPowerBehavior.BRAKE;
+        motorFL.setZeroPowerBehavior(behavior);
+        motorFR.setZeroPowerBehavior(behavior);
+        motorBL.setZeroPowerBehavior(behavior);
+        motorBR.setZeroPowerBehavior(behavior);
+
         while (opModeIsActive()) {
-            // Read joystick input
-            double y = gamepad1.left_stick_y;  // Forward/back
-            double x = gamepad1.left_stick_x;   // Left/right strafe
-            double rx = -gamepad1.right_stick_x; // Rotation
+            boolean bumper = gamepad1.left_bumper;
+            if (bumper && !lastBumperState) {
+                brakeMode = !brakeMode;
+                behavior = brakeMode ? DcMotor.ZeroPowerBehavior.BRAKE : DcMotor.ZeroPowerBehavior.FLOAT;
+                motorFL.setZeroPowerBehavior(behavior);
+                motorFR.setZeroPowerBehavior(behavior);
+                motorBL.setZeroPowerBehavior(behavior);
+                motorBR.setZeroPowerBehavior(behavior);
+            }
+            lastBumperState = bumper;
 
-            // Get current heading
+            double y = gamepad1.left_stick_y;
+            double x = gamepad1.left_stick_x;
+            double rx = -gamepad1.right_stick_x;
+
             double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-            // Compute offset from initial driver-facing heading
             double heading = currentHeading - initialHeading;
-
-            // Normalize to [-π, π]
             heading = (heading + Math.PI) % (2 * Math.PI) - Math.PI;
 
-            // CORRECT ROTATION OF JOYSTICK INPUT (DO NOT NEGATE ANGLE)
             double rotatedX = x * Math.cos(heading) - y * Math.sin(heading);
             double rotatedY = x * Math.sin(heading) + y * Math.cos(heading);
 
-            // Normalize motor power denominator
             double denominator = Math.max(Math.abs(rotatedY) + Math.abs(rotatedX) + Math.abs(rx), 1.0);
-
-            // Motor power calculation for omni wheel configuration
             double powerFL = (rotatedY + rx) / denominator;
             double powerBR = (rotatedY - rx) / denominator;
             double powerFR = (rotatedX - rx) / denominator;
             double powerBL = (rotatedX + rx) / denominator;
 
-            // Set powers to motors
             motorFL.setPower(powerFL);
             motorBR.setPower(powerBR);
             motorFR.setPower(powerFR);
             motorBL.setPower(powerBL);
 
-            // Telemetry
+            telemetry.addData("Brake Mode", brakeMode ? "BRAKE" : "FLOAT");
             telemetry.addData("Current Heading (deg)", Math.toDegrees(currentHeading));
             telemetry.addData("Driver Forward (deg)", Math.toDegrees(initialHeading));
             telemetry.addData("Relative Heading (deg)", Math.toDegrees(heading));
