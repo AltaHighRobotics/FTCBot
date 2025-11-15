@@ -13,21 +13,22 @@ public class MainDrive extends LinearOpMode {
     private DcMotor intake, rotaryspin, launcher;
     private IMU imu;
     private Servo pushup, rotarykick;
-
+    
     private double initialHeading = 0;
     private double launcherPower = 0.0;
-
+    private int x = 0;
     private boolean lastY = false;
     private boolean lastB = false;
     private boolean lastA = false;
 
     private static final double TICKS_PER_REV = 1425.1;
     private static final double DEGREES_PER_TICK = 360.0 / TICKS_PER_REV;
-    private static final double TARGET_DEGREES = 120.0;
+    private static final double TARGET_DEGREES = 119.0;
     private static final int TARGET_TICKS = (int) (TARGET_DEGREES / DEGREES_PER_TICK);
 
     @Override
     public void runOpMode() {
+        
         motorFL = hardwareMap.get(DcMotor.class, "motor2");
         motorBR = hardwareMap.get(DcMotor.class, "motor1");
         motorFR = hardwareMap.get(DcMotor.class, "motor3");
@@ -55,7 +56,7 @@ public class MainDrive extends LinearOpMode {
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pushup.setPosition(0);
-        rotarykick.setPosition(-1);
+        rotarykick.setPosition(0);
 
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot orientation =
@@ -75,6 +76,8 @@ public class MainDrive extends LinearOpMode {
         boolean lastX = false;
 
         while (opModeIsActive()) {
+            rotaryspin.setTargetPosition(x); //targetPos
+            rotarykick.setPosition(0);
             boolean bumper = gamepad1.left_bumper;
             if (bumper && !lastBumperState) brakeMode = !brakeMode;
             lastBumperState = bumper;
@@ -82,8 +85,8 @@ public class MainDrive extends LinearOpMode {
             if (gamepad1.x && !lastX) {
                 int startPos = rotaryspin.getCurrentPosition();
                 int targetPos = startPos + TARGET_TICKS;
-
-                rotaryspin.setTargetPosition(targetPos);
+                x = x+475;
+                rotaryspin.setTargetPosition(x); //targetPos
                 rotaryspin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 rotaryspin.setPower(1.0);
 
@@ -91,6 +94,7 @@ public class MainDrive extends LinearOpMode {
                     telemetry.addData("rotaryspin Target", targetPos);
                     telemetry.addData("rotaryspin Pos", rotaryspin.getCurrentPosition());
                     telemetry.update();
+                    
                 }
 
                 rotaryspin.setPower(0);
@@ -111,12 +115,13 @@ public class MainDrive extends LinearOpMode {
             }
             lastB = gamepad1.b;
 
-            rotarykick.setPosition(80.0 / 180.0);
+            rotarykick.setPosition(0);
 
             if (gamepad1.a && !lastA) {
+                
                 launcher.setPower(0.3);
                 sleep(1000);
-                rotarykick.setPosition(1 - (45.0 / 180.0));
+                rotarykick.setPosition(0.2);
                 sleep(500);
                 rotarykick.setPosition(0);
                 launcher.setPower(0.0);
