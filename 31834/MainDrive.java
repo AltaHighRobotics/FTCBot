@@ -9,6 +9,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "MainDrive")
 public class MainDrive extends LinearOpMode {
+   
+    private volatile boolean aActionRunning = false;
+    private volatile boolean bActionRunning = false;
+    private volatile boolean xActionRunning = false;
+   
     private DcMotor motorFL, motorFR, motorBL, motorBR;
     private DcMotor intake, rotaryspin, launcher;
     private IMU imu;
@@ -77,28 +82,32 @@ public class MainDrive extends LinearOpMode {
 
         while (opModeIsActive()) {
             rotaryspin.setTargetPosition(x); //targetPos
-            rotarykick.setPosition(0);
+            //rotarykick.setPosition(0);
             boolean bumper = gamepad1.left_bumper;
             if (bumper && !lastBumperState) brakeMode = !brakeMode;
             lastBumperState = bumper;
 
-            if (gamepad1.x && !lastX) {
-                int startPos = rotaryspin.getCurrentPosition();
-                int targetPos = startPos + TARGET_TICKS;
-                x = x+475;
-                rotaryspin.setTargetPosition(x); //targetPos
-                rotaryspin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                rotaryspin.setPower(1.0);
+            if (gamepad1.x && !lastX && !xActionRunning) {
+                xActionRunning = true;
+                new Thread (() -> {
+                    int startPos = rotaryspin.getCurrentPosition();
+                    int targetPos = startPos + TARGET_TICKS;
+                    x = x+475;
+                    rotaryspin.setTargetPosition(x); //targetPos
+                    rotaryspin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rotaryspin.setPower(1.0);
 
-                while (opModeIsActive() && rotaryspin.isBusy()) {
-                    telemetry.addData("rotaryspin Target", targetPos);
-                    telemetry.addData("rotaryspin Pos", rotaryspin.getCurrentPosition());
-                    telemetry.update();
+                    while (opModeIsActive() && rotaryspin.isBusy()) {
+                        telemetry.addData("rotaryspin Target", targetPos);
+                        telemetry.addData("rotaryspin Pos", rotaryspin.getCurrentPosition());
+                        telemetry.update();
                     
-                }
+                    }
 
-                rotaryspin.setPower(0);
-                rotaryspin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    rotaryspin.setPower(0);
+                    rotaryspin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    xActionRunning = false;
+                }).start();
             }
             lastX = gamepad1.x;
 
@@ -108,26 +117,55 @@ public class MainDrive extends LinearOpMode {
             }
             lastY = gamepad1.y;
 
-            if (gamepad1.b && !lastB) {
-                pushup.setPosition(5.0 / 180.0);
-                sleep(600);
-                pushup.setPosition(160.0 / 180.0);
+            if (gamepad1.b && !lastB && !bActionRunning) {
+                bActionRunning = true;
+                new Thread(() -> {
+                    pushup.setPosition(5.0 / 180.0);
+                    sleep(600);
+                    pushup.setPosition(160.0 / 180.0);
+                    
+                    
+                    int startPos = rotaryspin.getCurrentPosition();
+                    int targetPos = startPos + TARGET_TICKS;
+                    x = x+475;
+                    rotaryspin.setTargetPosition(x); //targetPos
+                    rotaryspin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    rotaryspin.setPower(1.0);
+
+                    while (opModeIsActive() && rotaryspin.isBusy()) {
+                        telemetry.addData("rotaryspin Target", targetPos);
+                        telemetry.addData("rotaryspin Pos", rotaryspin.getCurrentPosition());
+                        telemetry.update();
+                    
+                    }
+
+                    rotaryspin.setPower(0);
+                    rotaryspin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    bActionRunning = false;
+                }).start();
+                
+                
             }
             lastB = gamepad1.b;
 
-            rotarykick.setPosition(0);
+            //rotarykick.setPosition(0);
 
-            if (gamepad1.a && !lastA) {
-                
-                launcher.setPower(0.3);
-                sleep(1000);
-                rotarykick.setPosition(0.2);
-                sleep(500);
-                rotarykick.setPosition(0);
-                launcher.setPower(0.0);
+            if (gamepad1.a && !lastA && !aActionRunning) {
+                aActionRunning = true;
+                new Thread(() -> {
+                    launcher.setPower(0.3);
+                    sleep(1000);
+                    rotarykick.setPosition(0.2);
+                    sleep(500);
+                    rotarykick.setPosition(0);
+                    launcher.setPower(0.0);
+                    
+                    aActionRunning = false;
+                }).start();
             }
+                    
             lastA = gamepad1.a;
-
+                
             if (gamepad1.left_trigger > 0.05) {
                 motorFL.setPower(0);
                 motorFR.setPower(0);
